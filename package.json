@@ -1,0 +1,53 @@
+{
+  "name": "dshget-plugin",
+  "version": "0.1.0",
+  "description": "Search, inspect, update, and install DeepSeek Harness plugins from the DSH Get catalog.",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./core": "./src/core.js"
+  },
+  "files": [
+    "cordis.patch.yml",
+    "data/catalog.json",
+    "src/**/*.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "scripts": {
+    "test": "node --test",
+    "check": "npm test && npm pack --dry-run --cache ./node_modules/.cache/npm"
+  },
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh-tools": "^0.1.0-rc.5"
+  },
+  "dependencies": {
+    "@deepseek-ai/schemastery": "^3.18.1"
+  },
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "plugin-directory",
+    "plugin-manager"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bobby-sheng/dshget-plugin.git"
+  },
+  "homepage": "https://www.dshget.com/",
+  "bugs": {
+    "url": "https://github.com/bobby-sheng/dshget-plugin/issues"
+  },
+  "author": "bobby-sheng",
+  "license": "MIT"
+}
