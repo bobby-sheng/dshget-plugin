@@ -1,5 +1,8 @@
 # DSH Get Plugin
 
+[![CI](https://github.com/bobby-sheng/dshget-plugin/actions/workflows/ci.yml/badge.svg)](https://github.com/bobby-sheng/dshget-plugin/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 Search, inspect, update, and install DeepSeek Harness plugins without leaving DSH. The plugin uses the public [DSH Get](https://www.dshget.com/) catalog, ships an embedded snapshot for offline search, and links every result to its independent detail page.
 
 This is an independently maintained community plugin. It is not affiliated with or endorsed by DeepSeek.
@@ -11,6 +14,8 @@ dsh plugin --profile web add github:bobby-sheng/dshget-plugin
 ```
 
 Restart DSH after installation. The package ships JavaScript directly, so a GitHub installation does not run a build or `prepare` script.
+
+Supported runtime: DeepSeek Harness `0.1.0-rc.5` and newer compatible `0.1.x` prereleases, on Node.js `22.19+` or `24+`. See [compatibility](docs/COMPATIBILITY.md) for details.
 
 ## Commands
 
@@ -34,6 +39,13 @@ Restart DSH after installation. The package ships JavaScript directly, so a GitH
 - `dshget_plugin_info` returns one structured plugin record.
 
 Both tools are read-only. Installation is intentionally available only through the human `/dshget install` command.
+
+## Why use it
+
+- Search the catalog from the same DSH session where you work.
+- Keep a validated embedded snapshot available when the network or website is unavailable.
+- Inspect the exact repository and install command before installing anything.
+- Require an explicit human slash command for third-party installation.
 
 ## Independent operation
 
@@ -78,6 +90,8 @@ Installing any third-party DSH plugin runs code from that package. Review its so
 
 DSH Get Plugin does not execute catalog commands through a shell. It accepts only the documented `dsh plugin ... add` format, extracts an allowlisted npm package, `github:` spec, or GitHub Release tarball, and starts DSH with an argument array. Shell operators, local paths, arbitrary URLs, and unsupported install formats are rejected.
 
+See [SECURITY.md](SECURITY.md) for the trust boundary and vulnerability reporting process.
+
 ## 中文说明
 
 DSH Get Plugin 可以直接在 DSH 中搜索、查看和安装 DeepSeek Harness 插件。插件内置目录快照，因此网站或数据仓库暂时不可用时仍可离线搜索；执行 `/dshget update` 后会使用最新的公开数据缓存。
@@ -95,6 +109,14 @@ npm run check
 ```
 
 The test suite covers relevance ordering, special-character routes, cache fallback, remote validation, byte limits, and install-command injection rejection.
+
+Project documentation:
+
+- [Architecture](docs/ARCHITECTURE.md)
+- [Compatibility](docs/COMPATIBILITY.md)
+- [Troubleshooting](docs/TROUBLESHOOTING.md)
+- [Contributing](CONTRIBUTING.md)
+- [Changelog](CHANGELOG.md)
 
 ## License
 
