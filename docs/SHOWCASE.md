@@ -14,7 +14,7 @@ DSH Get Plugin brings the public [DSH Get](https://www.dshget.com/) catalog into
 ## Install
 
 ```bash
-dsh plugin --profile web add github:bobby-sheng/dshget-plugin
+dsh plugin --profile web add -w github:bobby-sheng/dshget-plugin
 ```
 
 Restart DSH after installation.
@@ -22,6 +22,8 @@ Restart DSH after installation.
 Repository: https://github.com/bobby-sheng/dshget-plugin
 
 Catalog: https://www.dshget.com/
+
+Release: https://github.com/bobby-sheng/dshget-plugin/releases/tag/v0.1.1
 
 ## Safety boundary
 

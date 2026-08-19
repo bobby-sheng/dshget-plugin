@@ -1,6 +1,6 @@
 {
   "name": "dshget-plugin",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Search, inspect, update, and install DeepSeek Harness plugins from the DSH Get catalog.",
   "type": "module",
   "main": "./src/index.js",

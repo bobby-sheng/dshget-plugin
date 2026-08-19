@@ -86,6 +86,7 @@ test('human install command executes a fixed argv without a shell', async () => 
     '--profile',
     'web',
     'add',
+    '-w',
     'github:volcengine/OpenViking#path:/examples/dsh-memory-plugin',
   ])
   assert.equal(runtime.spawns[0].stdio.stdin, 'ignore')

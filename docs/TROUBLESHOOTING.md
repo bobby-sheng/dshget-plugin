@@ -16,6 +16,16 @@ The output should contain an enabled row named `dshget-plugin`.
 
 Use Node.js 22.19 or 24+. Node.js 23 is outside the supported engine range used by DeepSeek Harness.
 
+## pnpm reports `ERR_PNPM_ADDING_TO_ROOT`
+
+Install into the profile workspace root explicitly:
+
+```bash
+dsh plugin --profile web add -w github:bobby-sheng/dshget-plugin
+```
+
+DSH Get Plugin also uses this form internally when `/dshget install` invokes `dsh plugin add`, so catalog installs work with pnpm versions that enforce the workspace-root check.
+
 ## Catalog update fails
 
 `/dshget update` requires access to the public `dshget-data` snapshot. A failed update does not delete the embedded catalog or a previously validated cache. Run `/dshget status` to see which source is active.

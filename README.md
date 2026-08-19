@@ -10,10 +10,10 @@ This is an independently maintained community plugin. It is not affiliated with 
 ## Install
 
 ```bash
-dsh plugin --profile web add github:bobby-sheng/dshget-plugin
+dsh plugin --profile web add -w github:bobby-sheng/dshget-plugin
 ```
 
-Restart DSH after installation. The package ships JavaScript directly, so a GitHub installation does not run a build or `prepare` script.
+Restart DSH after installation. The explicit `-w` targets the profile workspace root across supported pnpm versions. The package ships JavaScript directly, so a GitHub installation does not run a build or `prepare` script.
 
 Supported runtime: DeepSeek Harness `0.1.0-rc.5` and newer compatible `0.1.x` prereleases, on Node.js `22.19+` or `24+`. See [compatibility](docs/COMPATIBILITY.md) for details.
 

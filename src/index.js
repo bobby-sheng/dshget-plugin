@@ -85,7 +85,7 @@ async function installPlugin(ctx, config, plugin, signal) {
   const spec = parseInstallSpec(plugin.install)
   const executable = await ctx.subprocess.resolveExecutable(config.dshCommand, undefined, signal)
   const handle = ctx.subprocess.spawn({
-    argv: [executable, 'plugin', '--profile', config.profile, 'add', spec],
+    argv: [executable, 'plugin', '--profile', config.profile, 'add', '-w', spec],
     cwd: process.cwd(),
     stdio: {
       stdin: 'ignore',
