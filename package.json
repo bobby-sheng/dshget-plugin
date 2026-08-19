@@ -9,10 +9,12 @@
     "./core": "./src/core.js"
   },
   "files": [
+    "CHANGELOG.md",
     "cordis.patch.yml",
     "data/catalog.json",
     "src/**/*.js",
     "README.md",
+    "SECURITY.md",
     "LICENSE"
   ],
   "dsh": {
@@ -22,7 +24,8 @@
   },
   "scripts": {
     "test": "node --test",
-    "check": "npm test && npm pack --dry-run --cache ./node_modules/.cache/npm"
+    "test:catalog": "node scripts/verify-catalog.mjs",
+    "check": "npm test && npm run test:catalog && npm pack --dry-run --cache ./node_modules/.cache/npm"
   },
   "engines": {
     "node": "^22.19.0 || >=24.0.0"
@@ -47,6 +50,9 @@
   "homepage": "https://www.dshget.com/",
   "bugs": {
     "url": "https://github.com/bobby-sheng/dshget-plugin/issues"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "author": "bobby-sheng",
   "license": "MIT"
