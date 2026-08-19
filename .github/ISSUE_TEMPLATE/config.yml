@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: DSH Get website
+    url: https://www.dshget.com/
+    about: Browse the catalog and open individual plugin pages.
+  - name: DeepSeek Harness support
+    url: https://github.com/deepseek-ai/deepseek-harness/discussions/categories/q-a
+    about: Ask questions about DSH itself.

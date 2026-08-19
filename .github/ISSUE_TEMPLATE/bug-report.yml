@@ -1,0 +1,55 @@
+name: Bug report
+description: Report a reproducible problem in DSH Get Plugin.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Please remove API keys, credentials, and private repository data before submitting.
+  - type: input
+    id: dsh-version
+    attributes:
+      label: DSH version
+      placeholder: 0.1.0-rc.6
+    validations:
+      required: true
+  - type: input
+    id: node-version
+    attributes:
+      label: Node.js version
+      placeholder: 22.19.0
+    validations:
+      required: true
+  - type: dropdown
+    id: command
+    attributes:
+      label: Affected feature
+      options:
+        - Search command
+        - Info command
+        - Install command
+        - Update or cache
+        - Agent tools
+        - Plugin loading
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      description: Include the command and a minimal sequence that reproduces the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
