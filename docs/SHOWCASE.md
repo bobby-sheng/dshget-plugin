@@ -23,7 +23,7 @@ Repository: https://github.com/bobby-sheng/dshget-plugin
 
 Catalog: https://www.dshget.com/
 
-Release: https://github.com/bobby-sheng/dshget-plugin/releases/tag/v0.1.1
+Release: https://github.com/bobby-sheng/dshget-plugin/releases/tag/v0.2.0
 
 ## Safety boundary
 

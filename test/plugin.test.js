@@ -1,5 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import os from 'node:os'
+import path from 'node:path'
 import { apply } from '../src/index.js'
 
 function outputReader(text) {
@@ -74,13 +76,14 @@ test('human search and info commands use the embedded catalog', async () => {
 
 test('human install command executes a fixed argv without a shell', async () => {
   const runtime = harness()
-  apply(runtime.context, { profile: 'web' })
+  apply(runtime.context, { profile: 'web', dshHome: path.join(os.tmpdir(), 'dshget-plugin-test-missing-home') })
   const result = await runtime.commands[0].handler(invocation('install volcengine/OpenViking#examples/dsh-memory-plugin'))
 
   assert.equal(result.kind, 'success')
   assert.match(result.text, /Restart DSH/)
-  assert.equal(runtime.spawns.length, 1)
-  assert.deepEqual(runtime.spawns[0].argv, [
+  assert.equal(runtime.spawns.length, 3)
+  const install = runtime.spawns.find(spawn => spawn.argv.includes('add'))
+  assert.deepEqual(install.argv, [
     '/usr/local/bin/dsh',
     'plugin',
     '--profile',
@@ -89,7 +92,11 @@ test('human install command executes a fixed argv without a shell', async () => 
     '-w',
     'github:volcengine/OpenViking#path:/examples/dsh-memory-plugin',
   ])
-  assert.equal(runtime.spawns[0].stdio.stdin, 'ignore')
+  assert.equal(install.stdio.stdin, 'ignore')
+  assert.deepEqual(runtime.spawns.filter(spawn => spawn.argv.includes('--dump-config')).map(spawn => spawn.argv), [
+    ['/usr/local/bin/dsh', '--profile', 'web', '--dump-config'],
+    ['/usr/local/bin/dsh', '--profile', 'web', '--dump-config'],
+  ])
 })
 
 test('installation can be disabled without affecting search', async () => {

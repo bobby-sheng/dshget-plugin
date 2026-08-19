@@ -17,3 +17,5 @@ The repository ships JavaScript directly and declares `dsh.bundle.patch`. Instal
 ## Operating systems
 
 The plugin does not invoke a shell and uses Node.js filesystem and subprocess APIs. Automated CI runs on Linux; local integration verification has also been completed on macOS. Windows reports are welcome through the issue tracker.
+
+Installation audits read pnpm lockfile formats through a YAML parser and tolerate unavailable evidence by labeling it explicitly. Exact resolution fields depend on what the active pnpm version records. Registry packages normally expose `resolution.integrity`; Git dependencies normally expose a commit and tarball URL instead.

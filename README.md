@@ -29,7 +29,7 @@ Supported runtime: DeepSeek Harness `0.1.0-rc.5` and newer compatible `0.1.x` pr
 
 - `search` searches names, owners, categories, tags, descriptions, and catalog sources.
 - `info` accepts `owner/name`, a unique plugin name, a DSH Get URL, or a GitHub URL.
-- `install` installs the exact catalog entry into the configured DSH profile and asks you to restart DSH.
+- `install` installs the exact catalog entry, produces a six-section evidence report, stores a private local audit record, and asks you to restart DSH.
 - `update` fetches and validates the latest public snapshot from `dshget-data`.
 - `status` reports the active snapshot and whether the cache has passed its configured TTL.
 
@@ -90,13 +90,28 @@ Installing any third-party DSH plugin runs code from that package. Review its so
 
 DSH Get Plugin does not execute catalog commands through a shell. It accepts only the documented `dsh plugin ... add` format, extracts an allowlisted npm package, `github:` spec, or GitHub Release tarball, and starts DSH with an argument array. Shell operators, local paths, arbitrary URLs, and unsupported install formats are rejected.
 
+After a successful install, the command reports:
+
+1. the installed package name/version, exact Git commit when available, lockfile resolution, and registry integrity when pnpm records it;
+2. whether the catalog repository matches the installed package metadata;
+3. selected-package lifecycle scripts, pnpm `allowBuilds` state, and the DSH Host permission boundary;
+4. rows declared by `dsh.bundle.patch` and whether their ids were added or already existed;
+5. a before/after `dsh --dump-config` diff containing paths, types, and value hashes rather than raw values;
+6. the exact removal command and a local restoration record.
+
+Audit records are written atomically with file mode `0600` under `$DSH_HOME/cache/dshget/install-audits/`. They retain the before/after profile manifest and hashes for the lockfile, pnpm workspace, and effective configuration. Raw `--dump-config` values are not stored because effective configuration can contain credentials.
+
+This is post-install evidence, not sandboxing or a package review. A package may execute lifecycle scripts during installation, and a loaded Host plugin runs with the permissions of the `dsh` process. Review third-party code before installation.
+
 See [SECURITY.md](SECURITY.md) for the trust boundary and vulnerability reporting process.
 
 ## 中文说明
 
 DSH Get Plugin 可以直接在 DSH 中搜索、查看和安装 DeepSeek Harness 插件。插件内置目录快照，因此网站或数据仓库暂时不可用时仍可离线搜索；执行 `/dshget update` 后会使用最新的公开数据缓存。
 
-智能体工具只读，不会自动安装第三方代码。安装必须由用户明确执行 `/dshget install <owner/name>`，并且只允许目录中的安全 npm 或 GitHub 包标识。安装完成后需要重启 DSH。
+智能体工具只读，不会自动安装第三方代码。安装必须由用户明确执行 `/dshget install <owner/name>`，并且只允许目录中的安全 npm 或 GitHub 包标识。安装成功后会显示六项审计证据，并把脱敏后的本地记录保存到 `$DSH_HOME/cache/dshget/install-audits/`；记录不保存 `--dump-config` 的明文配置值。安装完成后需要重启 DSH。
+
+审计输出用于提高可见性，不代表安全审查或官方背书。第三方包仍可能在安装阶段运行生命周期脚本，加载后的 Host 插件仍拥有 `dsh` 进程权限。
 
 插件详情和可视化浏览继续由 [DSH Get](https://www.dshget.com/) 独立提供，网站不依赖本插件运行。
 
@@ -108,7 +123,7 @@ npm test
 npm run check
 ```
 
-The test suite covers relevance ordering, special-character routes, cache fallback, remote validation, byte limits, and install-command injection rejection.
+The test suite covers relevance ordering, special-character routes, cache fallback, remote validation, byte limits, install-command injection rejection, package identity, registry integrity, bundle effects, redacted config diffs, and private audit records.
 
 Project documentation:
 

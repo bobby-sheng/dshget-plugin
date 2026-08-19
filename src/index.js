@@ -9,6 +9,12 @@ import {
   pluginResult,
   searchCatalog,
 } from './core.js'
+import {
+  buildInstallAudit,
+  captureInstallState,
+  formatInstallAudit,
+  writeInstallAudit,
+} from './install-audit.js'
 import { CatalogStore } from './store.js'
 
 export const name = 'dshget-plugin'
@@ -41,6 +47,7 @@ function resolveConfig(config) {
     maxCatalogBytes: config.maxCatalogBytes ?? 20_000_000,
     maxResults: config.maxResults ?? 10,
     allowInstall: config.allowInstall ?? true,
+    dshHome: config.dshHome ?? process.env.DSH_HOME ?? path.join(os.homedir(), '.dsh'),
   }
   if (!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(resolved.profile)) throw new Error('dshget-plugin: profile must be a safe profile name')
   if (!/^[A-Za-z0-9._/-]+$/.test(resolved.dshCommand)) throw new Error('dshget-plugin: dshCommand must be a bare name or absolute path')
@@ -49,6 +56,41 @@ function resolveConfig(config) {
   if (!Number.isSafeInteger(resolved.maxCatalogBytes) || resolved.maxCatalogBytes < 100_000) throw new Error('dshget-plugin: maxCatalogBytes must be an integer of at least 100000')
   if (!Number.isSafeInteger(resolved.maxResults) || resolved.maxResults < 1 || resolved.maxResults > 50) throw new Error('dshget-plugin: maxResults must be an integer between 1 and 50')
   return resolved
+}
+
+function collectedText(handle, stream) {
+  return handle.collected[stream]?.readFrom(0).text.trim() ?? ''
+}
+
+function collectedOutput(handle, stream) {
+  const output = handle.collected[stream]?.readFrom(0)
+  return { text: output?.text.trim() ?? '', lossy: output?.lossy === true }
+}
+
+async function captureDshConfig(ctx, executable, profile, signal) {
+  try {
+    const handle = ctx.subprocess.spawn({
+      argv: [executable, '--profile', profile, '--dump-config'],
+      cwd: process.cwd(),
+      stdio: {
+        stdin: 'ignore',
+        stdout: { maxBytes: 2_000_000 },
+        stderr: { maxBytes: 64_000 },
+      },
+      graceMs: 5_000,
+      signal,
+    })
+    const outcome = await handle.done
+    const stdout = collectedOutput(handle, 'stdout')
+    const stderr = collectedOutput(handle, 'stderr')
+    if (stdout.lossy) return { available: false, error: 'dsh --dump-config exceeded the 2 MB evidence limit' }
+    if (outcome.exitCode !== 0) {
+      return { available: false, error: [stderr.text, stdout.text].filter(Boolean).join('\n').slice(-8_000) || `dsh --dump-config exited with ${outcome.exitCode}` }
+    }
+    return { available: true, stdout: stdout.text }
+  } catch (error) {
+    return { available: false, error: error instanceof Error ? error.message : String(error) }
+  }
 }
 
 function formatSearch(query, state, result, websiteUrl) {
@@ -84,6 +126,10 @@ async function installPlugin(ctx, config, plugin, signal) {
   if (plugin.installable === false) throw new Error(`${plugin.owner}/${plugin.name} is not marked installable`)
   const spec = parseInstallSpec(plugin.install)
   const executable = await ctx.subprocess.resolveExecutable(config.dshCommand, undefined, signal)
+  const profileDir = path.join(config.dshHome, 'profiles', config.profile)
+  const beforeDump = await captureDshConfig(ctx, executable, config.profile, signal)
+  const before = await captureInstallState(profileDir, beforeDump)
+  if (signal.aborted) throw new Error('installation cancelled')
   const handle = ctx.subprocess.spawn({
     argv: [executable, 'plugin', '--profile', config.profile, 'add', '-w', spec],
     cwd: process.cwd(),
@@ -96,19 +142,32 @@ async function installPlugin(ctx, config, plugin, signal) {
     signal,
   })
   const outcome = await handle.done
-  const stdout = handle.collected.stdout?.readFrom(0).text.trim() ?? ''
-  const stderr = handle.collected.stderr?.readFrom(0).text.trim() ?? ''
+  const stdout = collectedText(handle, 'stdout')
+  const stderr = collectedText(handle, 'stderr')
   if (signal.aborted) throw new Error('installation cancelled')
   if (outcome.exitCode !== 0) {
     const detail = [stderr, stdout].filter(Boolean).join('\n').slice(-8_000)
     throw new Error(`dsh plugin add failed${outcome.exitCode === null ? '' : ` with exit code ${outcome.exitCode}`}${detail ? `:\n${detail}` : ''}`)
   }
-  return [
-    `Installed ${plugin.owner}/${plugin.name} into profile ${config.profile}.`,
-    `Package: ${spec}`,
-    'Restart DSH to load the newly installed plugin.',
-    stdout,
-  ].filter(Boolean).join('\n')
+
+  try {
+    const afterDump = await captureDshConfig(ctx, executable, config.profile, signal)
+    const after = await captureInstallState(profileDir, afterDump)
+    const audit = await buildInstallAudit({ profile: config.profile, profileDir, plugin, spec, before, after })
+    const auditDir = path.join(path.dirname(config.cachePath), 'install-audits')
+    const auditPath = await writeInstallAudit(auditDir, audit)
+    return [formatInstallAudit(audit, auditPath), stdout && `\nInstaller output:\n${stdout}`].filter(Boolean).join('\n')
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error)
+    return [
+      `Installed ${plugin.owner}/${plugin.name} into profile ${config.profile}.`,
+      `Package: ${spec}`,
+      `Installation audit could not be completed: ${detail}`,
+      'This does not change the trust boundary: the installed Host plugin runs with the permissions of the dsh process.',
+      'Restart DSH to load the newly installed plugin.',
+      stdout,
+    ].filter(Boolean).join('\n')
+  }
 }
 
 async function handleCommand(ctx, config, store, invocation) {

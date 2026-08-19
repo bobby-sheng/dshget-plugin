@@ -15,9 +15,11 @@ DSH Get Plugin reduces this risk by:
 - accepting only npm package identifiers, `github:` specifications, or GitHub-hosted release tarballs;
 - rejecting local paths, arbitrary URLs, and shell syntax;
 - executing `dsh plugin add` with a fixed argument array rather than a shell;
+- reporting the exact installed identity, available lockfile integrity, package repository metadata, lifecycle scripts, pnpm build policy, bundle rows, and effective configuration changes;
+- writing private restoration evidence without retaining raw effective configuration values;
 - validating and size-limiting remote catalog snapshots before caching them.
 
-Catalog inclusion is not a security review or endorsement. Users should inspect a plugin's source, permissions, maintenance history, and license before installation.
+The audit is generated after pnpm succeeds. It does not prevent lifecycle scripts from running, prove that a package is benign, or sandbox a loaded Host plugin. Catalog inclusion and audit output are not a security review or endorsement. Users should inspect a plugin's source, permissions, maintenance history, and license before installation.
 
 ## Reporting a vulnerability
 

@@ -49,7 +49,7 @@ export class CatalogStore {
     const response = await this.fetch(this.dataUrl, {
       headers: {
         accept: 'application/json',
-        'user-agent': 'dshget-plugin/0.1.1',
+        'user-agent': 'dshget-plugin/0.2.0',
       },
       signal: AbortSignal.any(signals),
     })
